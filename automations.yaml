@@ -1,0 +1,89 @@
+- id: sprinkler_schedule
+  alias: Sprinkler Schedule
+  description: Runs both valves at 5:30 AM and 5:30 PM if rain skip is inactive.
+  trigger:
+    - platform: time
+      at: "05:30:00"
+    - platform: time
+      at: "17:30:00"
+  condition:
+    - condition: state
+      entity_id: input_boolean.sprinkler_rain_skip
+      state: "off"
+    - condition: state
+      entity_id: binary_sensor.smart_rain_skip
+      state: "off"
+  action:
+    - action: script.sprinkler_run_all_zones
+
+- id: sprinkler_safety_shutoff
+  alias: Sprinkler Safety Shutoff
+  description: Closes all valves if either has been open for 40+ minutes.
+  trigger:
+    - platform: state
+      entity_id:
+        - valve.backyard_tap
+        - valve.grass
+      to: "open"
+      for:
+        minutes: 40
+  action:
+    - action: script.sprinkler_all_off
+    - action: script.turn_off
+      target:
+        entity_id: script.sprinkler_run_all_zones
+    - action: persistent_notification.create
+      data:
+        title: "Sprinkler Safety Shutoff"
+        message: >
+          {{ trigger.to_state.name }} was open for 40 minutes and has been
+          closed automatically. Please inspect the system.
+
+- id: sprinkler_rain_detection
+  alias: Sprinkler Rain Detection
+  description: Activates manual rain skip when weather turns rainy.
+  trigger:
+    - platform: state
+      entity_id: binary_sensor.smart_rain_skip
+      to: "on"
+  action:
+    - action: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.sprinkler_rain_skip
+
+- id: sprinkler_daily_reset
+  alias: Sprinkler Daily Reset
+  description: Clears the manual rain skip at 3 AM so normal schedule resumes.
+  trigger:
+    - platform: time
+      at: "03:00:00"
+  action:
+    - action: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.sprinkler_rain_skip
+
+- id: sprinkler_skip_notification
+  alias: Sprinkler Skip Notification
+  description: Notifies when a scheduled run is skipped due to rain.
+  trigger:
+    - platform: time
+      at: "05:30:00"
+    - platform: time
+      at: "17:30:00"
+  condition:
+    - condition: or
+      conditions:
+        - condition: state
+          entity_id: input_boolean.sprinkler_rain_skip
+          state: "on"
+        - condition: state
+          entity_id: binary_sensor.smart_rain_skip
+          state: "on"
+  action:
+    - action: persistent_notification.create
+      data:
+        title: "Sprinkler Run Skipped"
+        message: >
+          Scheduled run at {{ now().strftime('%I:%M %p') }} was skipped.
+          Manual skip: {{ states('input_boolean.sprinkler_rain_skip') }},
+          Smart skip: {{ states('binary_sensor.smart_rain_skip') }}.

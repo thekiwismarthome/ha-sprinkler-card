@@ -1,0 +1,283 @@
+type: vertical-stack
+cards:
+
+  # ── Hero / Status Card ──────────────────────────────────────────────────────
+  - type: custom:bubble-card
+    card_type: button
+    entity: sensor.sprinkler_active_zone
+    name: Smart Sprinkler
+    icon: mdi:sprinkler
+    button_type: name
+    show_icon: false
+    show_name: true
+    sub_button:
+      main:
+        - entity: sensor.sprinkler_active_zone
+          icon: mdi:water
+          show_state: true
+          show_icon: true
+          show_name: false
+          state_background: false
+        - entity: input_boolean.sprinkler_rain_skip
+          name: Rain Skip
+          icon: mdi:weather-rainy
+          show_state: false
+          show_icon: true
+          show_name: true
+          state_background: true
+          tap_action:
+            action: toggle
+        - entity: sensor.sprinkler_next_run
+          icon: mdi:clock-outline
+          show_state: true
+          show_icon: true
+          show_name: false
+          state_background: false
+        - entity: sensor.sprinkler_adjusted_runtime
+          icon: mdi:timer-outline
+          show_state: true
+          show_icon: true
+          show_name: false
+          state_background: false
+      bottom:
+        - entity: sensor.sprinkler_last_ran
+          icon: mdi:history
+          show_state: true
+          show_icon: true
+          show_name: false
+          state_background: false
+    styles: |
+      .bubble-button {
+        min-height: 200px !important;
+        background-image: linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.62)),
+          url("/local/images/sprinkler.jpeg") !important;
+        background-size: cover !important;
+        background-position: center !important;
+        border-radius: 28px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.18) !important;
+        align-items: flex-end !important;
+      }
+      .bubble-name {
+        color: white !important;
+        font-size: 21px !important;
+        font-weight: 800 !important;
+        text-shadow: 0 2px 8px rgba(0,0,0,0.65) !important;
+      }
+      .sub-button {
+        background: rgba(255,255,255,0.18) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(255,255,255,0.35) !important;
+        border-radius: 999px !important;
+        color: white !important;
+        font-size: 10.5px !important;
+        font-weight: 700 !important;
+      }
+    tap_action:
+      action: none
+
+  - type: custom:bubble-card
+    card_type: separator
+    sub_button:
+      main: []
+      bottom: []
+
+  # ── Valve Cards (tap = open, hold = close) ──────────────────────────────────
+  - type: horizontal-stack
+    cards:
+
+      # ── Backyard Tap ──────────────────────────────────────────────────────
+      - type: custom:bubble-card
+        card_type: button
+        entity: valve.backyard_tap
+        name: Backyard Tap
+        icon: mdi:pipe-valve
+        button_type: name
+        show_icon: true
+        show_name: true
+        sub_button:
+          main:
+            - entity: sensor.backyard_tap_runtime
+              icon: mdi:clock-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+            - entity: sensor.backyard_tap_water_daily
+              icon: mdi:water-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+            - entity: sensor.backyard_tap_water_monthly
+              icon: mdi:calendar-month-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+          bottom: []
+        styles: |
+          .bubble-button {
+            background: ${state === 'open' ? '#2196F3' : '#ffffff'} !important;
+            color: ${state === 'open' ? 'white' : '#1a1c1c'} !important;
+            border: ${state === 'open' ? '2px solid #1976D2' : '1px solid #e0e0e0'} !important;
+            box-shadow: ${state === 'open' ? '0 8px 20px rgba(33,150,243,0.30)' : '0 6px 16px rgba(0,0,0,0.08)'} !important;
+          }
+          .bubble-icon {
+            color: ${state === 'open' ? '#FFD54F' : '#404752'} !important;
+            opacity: 1 !important;
+          }
+          .bubble-name {
+            color: ${state === 'open' ? 'white' : '#1a1c1c'} !important;
+          }
+          .sub-button {
+            border: 1px solid rgba(0,0,0,0.15) !important;
+          }
+        tap_action:
+          action: call-service
+          service: valve.open_valve
+          service_data:
+            entity_id: valve.backyard_tap
+        hold_action:
+          action: call-service
+          service: valve.close_valve
+          service_data:
+            entity_id: valve.backyard_tap
+
+      # ── Grass ──────────────────────────────────────────────────────────────
+      - type: custom:bubble-card
+        card_type: button
+        entity: valve.grass
+        name: Grass
+        icon: mdi:sprinkler-variant
+        button_type: name
+        show_icon: true
+        show_name: true
+        sub_button:
+          main:
+            - entity: sensor.grass_runtime
+              icon: mdi:clock-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+            - entity: sensor.grass_water_daily
+              icon: mdi:water-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+            - entity: sensor.grass_water_monthly
+              icon: mdi:calendar-month-outline
+              show_state: true
+              show_icon: true
+              show_name: false
+              state_background: false
+          bottom: []
+        styles: |
+          .bubble-button {
+            background: ${state === 'open' ? '#2196F3' : '#ffffff'} !important;
+            color: ${state === 'open' ? 'white' : '#1a1c1c'} !important;
+            border: ${state === 'open' ? '2px solid #1976D2' : '1px solid #e0e0e0'} !important;
+            box-shadow: ${state === 'open' ? '0 8px 20px rgba(33,150,243,0.30)' : '0 6px 16px rgba(0,0,0,0.08)'} !important;
+          }
+          .bubble-icon {
+            color: ${state === 'open' ? '#FFD54F' : '#404752'} !important;
+            opacity: 1 !important;
+          }
+          .bubble-name {
+            color: ${state === 'open' ? 'white' : '#1a1c1c'} !important;
+          }
+          .sub-button {
+            border: 1px solid rgba(0,0,0,0.15) !important;
+          }
+        tap_action:
+          action: call-service
+          service: valve.open_valve
+          service_data:
+            entity_id: valve.grass
+        hold_action:
+          action: call-service
+          service: valve.close_valve
+          service_data:
+            entity_id: valve.grass
+
+  - type: custom:bubble-card
+    card_type: separator
+    sub_button:
+      main: []
+      bottom: []
+
+  # ── Run Both / All Off ───────────────────────────────────────────────────────
+  - type: horizontal-stack
+    cards:
+      - type: custom:bubble-card
+        card_type: button
+        name: Run Both Valves
+        icon: mdi:play-circle
+        button_type: name
+        show_icon: true
+        show_name: true
+        styles: |
+          .bubble-button {
+            border-radius: 24px !important;
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08) !important;
+          }
+          .bubble-icon { color: #0061a4 !important; }
+        tap_action:
+          action: call-service
+          service: script.sprinkler_run_all_zones
+
+      - type: custom:bubble-card
+        card_type: button
+        name: All Off
+        icon: mdi:water-off
+        button_type: name
+        show_icon: true
+        show_name: true
+        styles: |
+          .bubble-button {
+            border-radius: 24px !important;
+            background: #ffffff !important;
+            border: 1px solid #e0e0e0 !important;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.08) !important;
+          }
+          .bubble-icon { color: #b81311 !important; }
+        tap_action:
+          action: call-service
+          service: script.sprinkler_all_off
+
+  - type: custom:bubble-card
+    card_type: separator
+    sub_button:
+      main: []
+      bottom: []
+
+  # ── Emergency All Off ────────────────────────────────────────────────────────
+  - type: custom:bubble-card
+    card_type: button
+    name: EMERGENCY ALL OFF
+    icon: mdi:alert-octagon
+    button_type: name
+    show_icon: true
+    show_name: true
+    sub_button:
+      main: []
+      bottom: []
+    styles: |
+      .bubble-button {
+        border-radius: 28px !important;
+        background: linear-gradient(135deg, #b81311, #d50000) !important;
+        color: white !important;
+        box-shadow: 0 10px 28px rgba(184,19,17,0.45) !important;
+        border: 2px solid rgba(255,255,255,0.18) !important;
+        font-weight: 800 !important;
+      }
+      .bubble-button:active { transform: scale(0.98) !important; }
+      .bubble-icon { color: white !important; opacity: 1 !important; }
+      .bubble-name { color: white !important; font-weight: 800 !important; letter-spacing: 0.02em !important; }
+      .sub-button { display: none !important; }
+    tap_action:
+      action: call-service
+      service: script.sprinkler_all_off

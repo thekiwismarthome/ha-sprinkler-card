@@ -1,0 +1,24 @@
+# Daily meters reset at midnight.
+# Monthly meters reset on the 1st of each month.
+#
+# These create four entities:
+#   sensor.backyard_tap_water_daily
+#   sensor.backyard_tap_water_monthly
+#   sensor.grass_water_daily
+#   sensor.grass_water_monthly
+
+backyard_tap_water_daily:
+  source: sensor.backyard_tap_volume_total
+  cycle: daily
+
+backyard_tap_water_monthly:
+  source: sensor.backyard_tap_volume_total
+  cycle: monthly
+
+grass_water_daily:
+  source: sensor.grass_volume_total
+  cycle: daily
+
+grass_water_monthly:
+  source: sensor.grass_volume_total
+  cycle: monthly

@@ -1,0 +1,53 @@
+- sensor:
+    # ── Active valve ───────────────────────────────────────────────────────────
+    - name: "Sprinkler Active Zone"
+      unique_id: sprinkler_active_zone
+      state: >
+        {% if is_state('valve.backyard_tap', 'open') %}Backyard Tap
+        {% elif is_state('valve.grass', 'open') %}Grass
+        {% else %}Idle
+        {% endif %}
+
+    # ── Last ran (human-readable) ──────────────────────────────────────────────
+    - name: "Sprinkler Last Ran"
+      unique_id: sprinkler_last_ran
+      state: >
+        {% set dt = states('input_datetime.sprinkler_last_run') %}
+        {% if dt in ('unknown', 'unavailable', '') %}
+          Never
+        {% else %}
+          {{ as_timestamp(dt) | timestamp_custom('%b %-d at %-I:%M %p') }}
+        {% endif %}
+
+    # ── Next run / skip status ─────────────────────────────────────────────────
+    - name: "Sprinkler Next Run"
+      unique_id: sprinkler_next_run
+      state: >
+        {% if is_state('binary_sensor.smart_rain_skip', 'on') %}
+          Smart skip (rain)
+        {% elif is_state('input_boolean.sprinkler_rain_skip', 'on') %}
+          Manually skipped
+        {% else %}
+          5:30 AM / 5:30 PM
+        {% endif %}
+
+    # ── Weather-adjusted runtime (5–30 min, base 20) ───────────────────────────
+    - name: "Sprinkler Adjusted Runtime"
+      unique_id: sprinkler_adjusted_runtime
+      unit_of_measurement: "min"
+      state: >
+        {% set temp = states('sensor.outdoor_temperature') | float(20) %}
+        {% if   temp > 35 %} {{ 30 }}
+        {% elif temp > 28 %} {{ 25 }}
+        {% elif temp < 10 %} {{ 5  }}
+        {% elif temp < 15 %} {{ 10 }}
+        {% else %}           {{ 20 }}
+        {% endif %}
+
+  # ── Smart rain-skip binary sensor ────────────────────────────────────────────
+  binary_sensor:
+    - name: "Smart Rain Skip"
+      unique_id: smart_rain_skip
+      state: >
+        {{ states('weather.home') in
+           ['rainy', 'pouring', 'lightning-rainy', 'snowy-rainy'] }}

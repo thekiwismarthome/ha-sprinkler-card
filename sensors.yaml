@@ -1,0 +1,22 @@
+# Riemann-sum integration: instantaneous flow rate → cumulative volume.
+#
+# Assumes flow rate sensors report in L/min.
+# If your sensors use L/h, change unit_time to h.
+# If already cumulative (L total), skip these and point utility_meter
+# directly at the source sensors instead.
+
+- platform: integration
+  source: sensor.backyard_tap_volume_flow_rate
+  name: Backyard Tap Volume Total
+  unique_id: backyard_tap_volume_total
+  unit_time: min
+  round: 2
+  method: trapezoidal
+
+- platform: integration
+  source: sensor.grass_volume_flow_rate
+  name: Grass Volume Total
+  unique_id: grass_volume_total
+  unit_time: min
+  round: 2
+  method: trapezoidal

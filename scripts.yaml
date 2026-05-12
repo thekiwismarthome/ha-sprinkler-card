@@ -1,0 +1,60 @@
+sprinkler_all_off:
+  alias: Sprinkler All Off
+  mode: single
+  sequence:
+    - action: valve.close_valve
+      target:
+        entity_id:
+          - valve.backyard_tap
+          - valve.grass
+
+sprinkler_run_all_zones:
+  alias: Run Both Valves
+  mode: single
+  sequence:
+    - condition: state
+      entity_id: input_boolean.sprinkler_rain_skip
+      state: "off"
+
+    - action: input_datetime.set_datetime
+      target:
+        entity_id: input_datetime.sprinkler_last_run
+      data:
+        datetime: "{{ now().strftime('%Y-%m-%d %H:%M:%S') }}"
+
+    - action: persistent_notification.create
+      data:
+        title: Sprinkler Started
+        message: >
+          Run started at {{ now().strftime('%I:%M %p') }}.
+          Runtime per valve: {{ states('sensor.sprinkler_adjusted_runtime') }} minutes.
+
+    # Backyard Tap
+    - action: script.sprinkler_all_off
+    - action: valve.open_valve
+      target:
+        entity_id: valve.backyard_tap
+    - delay:
+        minutes: "{{ states('sensor.sprinkler_adjusted_runtime') | int(20) }}"
+    - action: valve.close_valve
+      target:
+        entity_id: valve.backyard_tap
+
+    # Grass
+    - action: script.sprinkler_all_off
+    - action: valve.open_valve
+      target:
+        entity_id: valve.grass
+    - delay:
+        minutes: "{{ states('sensor.sprinkler_adjusted_runtime') | int(20) }}"
+    - action: valve.close_valve
+      target:
+        entity_id: valve.grass
+
+    - action: script.sprinkler_all_off
+
+    - action: persistent_notification.create
+      data:
+        title: Sprinkler Completed
+        message: >
+          Run completed at {{ now().strftime('%I:%M %p') }}.
